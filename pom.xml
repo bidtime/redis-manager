@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+<!--
+	<parent>
+		<groupId>com.ecarpo.bms</groupId>
+		<artifactId>ecarpo-bms-parent-api</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+-->
+
+	<groupId>org.bidtime.utils</groupId>
+	<artifactId>redis-manager</artifactId>
+	<packaging>jar</packaging>
+	<version>1.0.1</version>
+	<name>redis-manager</name>
+	
+	<properties>
+		<fastjson.version>1.2.17</fastjson.version>
+		<cache-manager.version>1.0.1</cache-manager.version>
+		<commons-lang3.version>3.5</commons-lang3.version>
+
+		<commons-lang.version>2.6</commons-lang.version>
+		<log4j.version>1.2.17</log4j.version>
+		<slf4j-api.version>1.7.12</slf4j-api.version>
+		<slf4j-log4j12.version>1.7.12</slf4j-log4j12.version>
+
+		<junit.version>4.12</junit.version>
+
+	</properties>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>org.bidtime.utils</groupId>
+			<artifactId>cache-manager</artifactId>
+			<version>${cache-manager.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>${commons-lang.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>${log4j.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j-api.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>${slf4j-log4j12.version}</version>
+		</dependency>
+
+		<!--
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>${}</version>
+		</dependency>
+		-->
+
+		<!--
+		<dependency>
+			<groupId>net.spy</groupId>
+			<artifactId>spymemcached</artifactId>
+			<version>2.12.0</version>
+		</dependency>
+		-->
+		
+		<!-- https://mvnrepository.com/artifact/redis.clients/jedis -->
+		<dependency>
+		    <groupId>redis.clients</groupId>
+		    <artifactId>jedis</artifactId>
+		    <version>2.9.0</version>
+		</dependency>
+
+		<!--
+		<dependency>
+			<groupId>com.googlecode.xmemcached</groupId>
+			<artifactId>xmemcached</artifactId>
+			<version>2.0.0</version>
+		</dependency>
+		-->
+
+	</dependencies>
+
+
+</project>
