@@ -1,4 +1,4 @@
-package org.bidtime.cache;
+package org.bidtime.cache.utils;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.HostAndPort;
-import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPoolConfig;
 
 public class ConnectionPools {
@@ -23,8 +22,6 @@ public class ConnectionPools {
     private static JedisPoolConfig poolConfig;
     
     private static Set<HostAndPort> servers;
-    
-    //private GenericKeyedObjectPoolConfig conf;
 
 	public ConnectionPools() {
 	}
@@ -35,17 +32,20 @@ public class ConnectionPools {
 		// 连接创建工厂（用户新建连接）
 		poolConfig = new JedisPoolConfig();
 		// 连接池配置
+	    CfgParam cfg = new ConnectionPools().new CfgParam();
+		List<HostPort> list = getProps("redis.properties", cfg);
 	    // 最大连接数
-	    poolConfig.setMaxTotal(10);
+	    poolConfig.setMaxTotal(cfg.getMaxTotal());
 	    // 最大空闲数
-	    poolConfig.setMaxIdle(1);
+	    poolConfig.setMaxIdle(cfg.getMaxIdle());
 	    // 最大允许等待时间，如果超过这个时间还未获取到连接，则会报JedisException异常：
 	    // Could not get a resource from the pool
-	    poolConfig.setMaxWaitMillis(1000);
-	    //
-		List<CfgPar> list = getProps("redis_client.conf");
+	    poolConfig.setMaxWaitMillis(cfg.getMaxWait());	
+	    poolConfig.setTestOnBorrow(cfg.getTestOnBorrow());
+	    poolConfig.setTestOnReturn(cfg.getTestOnReturn());
+		// servers
 		servers = new LinkedHashSet<HostAndPort>();
-	    for (CfgPar p : list) {
+	    for (HostPort p : list) {
 	    	HostAndPort host = new HostAndPort(p.getServer(), p.getPort());
 	    	servers.add(host);
 		}
@@ -53,15 +53,21 @@ public class ConnectionPools {
 
     private static final String CONFIG_LOCATION_DELIMITERS = ",; \t\n";
 
-	private static List<CfgPar> getProps(String props) {
-		List<CfgPar> list = null;
+	private static List<HostPort> getProps(String props, CfgParam cfg) {
+		List<HostPort> list = null;
 		Properties p = new Properties();
 		try {
 			InputStream in = ConnectionPools.class.getClassLoader().getResourceAsStream(
                     props);
             p.load(in);
-            String servers = p.getProperty("server");
+            String servers = p.getProperty("redis.hosts");
             list = toList(servers);
+            //
+            cfg.setMaxIdle(Integer.parseInt(p.getProperty("redis.maxIdle")));
+            cfg.setMaxWait(Integer.parseInt(p.getProperty("redis.maxWait")));
+            cfg.setMaxTotal(Integer.parseInt(p.getProperty("redis.maxTotal")));
+            cfg.setTestOnBorrow(Boolean.parseBoolean(p.getProperty("redis.testOnBorrow")));
+            cfg.setTestOnReturn(Boolean.parseBoolean(p.getProperty("redis.testOnReturn")));
             in.close();
 		} catch (Exception e) {
 			log.error("getProps: {}", e.getMessage());
@@ -71,17 +77,17 @@ public class ConnectionPools {
 		return list;
 	}
 	
-	class CfgPar {
+	class HostPort {
 		
 		private String server;
 
 		private Integer port;
 		
-		public CfgPar() {
+		public HostPort() {
 			
 		}
 		
-		public CfgPar(String servers) {
+		public HostPort(String servers) {
 			String[] srv_port = tokenizeToStringArray(servers,
     				":", true, true);
 			server = srv_port[0];
@@ -106,12 +112,70 @@ public class ConnectionPools {
 		
 	}
 	
-	public static List<CfgPar> toList(String srv) throws Exception {
-		List<CfgPar> list = new ArrayList<CfgPar>();
+	class CfgParam {
+		
+		private Integer maxIdle;
+
+		private Integer maxWait;
+
+		private Integer maxTotal;
+		
+		private Boolean testOnReturn;
+
+		private Boolean testOnBorrow;
+		
+		public CfgParam() {
+			
+		}
+
+		public Integer getMaxIdle() {
+			return maxIdle;
+		}
+
+		public void setMaxIdle(Integer maxIdle) {
+			this.maxIdle = maxIdle;
+		}
+
+		public Integer getMaxWait() {
+			return maxWait;
+		}
+
+		public void setMaxWait(Integer maxWait) {
+			this.maxWait = maxWait;
+		}
+
+		public Boolean getTestOnBorrow() {
+			return testOnBorrow;
+		}
+
+		public void setTestOnBorrow(Boolean testOnBorrow) {
+			this.testOnBorrow = testOnBorrow;
+		}
+		
+		public Boolean getTestOnReturn() {
+			return testOnReturn;
+		}
+
+		public void setTestOnReturn(Boolean testOnReturn) {
+			this.testOnReturn = testOnReturn;
+		}
+
+		public Integer getMaxTotal() {
+			return maxTotal;
+		}
+
+		public void setMaxTotal(Integer maxTotal) {
+			this.maxTotal = maxTotal;
+		}
+		
+	}
+	
+	public static List<HostPort> toList(String srv) throws Exception {
+		List<HostPort> list = new ArrayList<HostPort>();
 		String[] args = tokenizeToStringArray(srv,
 				CONFIG_LOCATION_DELIMITERS, true, true);
 		for (String s : args) {
-			CfgPar p = new ConnectionPools().new CfgPar(s);
+			HostPort p = new ConnectionPools().new HostPort(s);
 			list.add(p);
 		}
 		return list;
@@ -154,22 +218,5 @@ public class ConnectionPools {
         }
         return instance;
     }
-    
-    public JedisCluster get() {
-	    JedisCluster cluster = new JedisCluster(servers, poolConfig);
-	    //String name = cluster.get("name");
-	    //System.out.println(name);
-	    return cluster;
-    }
-    
-//	public JedisPoolConfig get() {
-//		// 连接池
-//		JedisPoolConfig connectionPool = new ConnectionPool(pooledConnectionFactory, conf);
-//		return connectionPool;
-//	}
-	
-//	public void setCfgPar(CfgPar par) {
-//		this.par = par;		
-//	}
 
 }
