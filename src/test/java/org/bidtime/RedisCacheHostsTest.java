@@ -7,8 +7,9 @@ package org.bidtime;
 import java.util.Set;
 
 import org.JUnitTestBase;
+import org.bidtime.bean.A;
 import org.bidtime.cache.AbstractCache;
-import org.bidtime.cache.RedisCacheHost;
+import org.bidtime.cache.RedisCacheHosts;
 import org.bidtime.cache.utils.ConnectionPools;
 import org.junit.Test;
 
@@ -25,19 +26,30 @@ public class RedisCacheHostsTest extends JUnitTestBase {
   protected AbstractCache getRedis(ConnectionPools pools) throws Exception {
     JedisPoolConfig cfg = pools.getPoolConfig();
     Set<HostAndPort> servers = pools.getServers();
-    AbstractCache redisCache = new RedisCacheHost(cfg, servers);
+    AbstractCache redisCache = new RedisCacheHosts(cfg, servers);
     return redisCache;
   }
 
   @Test
   public void test_set() throws Exception {
-    String v = "054";
-    super.set(v);
+    A a = super.newA();
+    super.set(a);
   }
 
   @Test
   public void test_get() throws Exception {
     super.get();
+  }
+
+  @Test
+  public void test_setString() throws Exception {
+    String v = "054";
+    super.setString(v);
+  }
+
+  @Test
+  public void test_getString() throws Exception {
+    super.getString();
   }
 
 }

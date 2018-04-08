@@ -47,16 +47,18 @@ public class RedisCacheAdapt extends AbstractCache {
   }
 
   @Override
-  public Object get(String key) throws Exception {
-    return cache.get(key);
+  public Object get(String key, boolean del) throws Exception {
+    return cache.get(key, del);
   }
   
-  public String getString(String key) throws Exception {
-    return cache.getString(key);
-  }
-  
+  @Override
   public void setString(String key, int seconds, String s) throws Exception {
     cache.setString(key, seconds, s);  
+  }
+  
+  @Override
+  public String getString(String key, boolean del) throws Exception {
+    return cache.getString(key, del);
   }
 
 }

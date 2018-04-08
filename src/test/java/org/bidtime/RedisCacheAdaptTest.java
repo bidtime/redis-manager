@@ -7,6 +7,7 @@ package org.bidtime;
 import java.util.Set;
 
 import org.JUnitTestBase;
+import org.bidtime.bean.A;
 import org.bidtime.cache.AbstractCache;
 import org.bidtime.cache.RedisCacheAdapt;
 import org.bidtime.cache.utils.ConnectionPools;
@@ -30,9 +31,20 @@ public class RedisCacheAdaptTest extends JUnitTestBase {
   }
 
   @Test
-  public void test_set() throws Exception {
+  public void test_setString() throws Exception {
     String v = "054";
     super.set(v);
+  }
+
+  @Test
+  public void test_getString() throws Exception {
+    super.getString();
+  }
+
+  @Test
+  public void test_set() throws Exception {
+    A a = super.newA();
+    super.set(a);
   }
 
   @Test

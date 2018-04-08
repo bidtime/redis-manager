@@ -4,6 +4,7 @@
  */
 package org;
 
+import org.bidtime.bean.A;
 import org.bidtime.cache.AbstractCache;
 import org.bidtime.cache.utils.ConnectionPools;
 
@@ -21,6 +22,7 @@ public class JUnitTestBase {
 	//public class JUnitTestBase extends AbstractJUnit4SpringContextTests {
   
   protected static final String KEY1 = "key1";
+  protected static final String KEY2 = "key2";
   
   protected AbstractCache getRedis() throws Exception {
     ConnectionPools pools = ConnectionPools.getInstance();
@@ -37,19 +39,38 @@ public class JUnitTestBase {
     return result + 1; // +1后，[0,10)集合变为[1,11)集合，满足要求
   }
   
-  public void set(Object v) throws Exception {
+  public void setString(String v) throws Exception {
     AbstractCache cache = this.getRedis();
     //String v = "542";
-    cache.set(KEY1, 1000, v);
+    cache.setString(KEY1, 200000, v);
     print(v);
+  }
+  
+  public void getString() throws Exception {
+    AbstractCache cache = this.getRedis();
+    String v = cache.getString(KEY1, false);
+    print(v);
+  }
+  
+  public void set(Object o) throws Exception {
+    AbstractCache cache = this.getRedis();
+    cache.set(KEY2, 200000, o);
+    print(o);
   }
   
   public void get() throws Exception {
     AbstractCache cache = this.getRedis();
-    String v = (String)cache.get(KEY1);
-    print(v);
+    Object o = cache.get(KEY2, false);
+    print(o);
   }
-
+  
+  protected A newA() {
+    A a = new A();
+    a.setId(1);
+    a.setName("a1");
+    a.setSalary(10.0);
+    return a;
+  }
 
   /**
    * ＊ QuoteFieldNames———-输出key时是否使用双引号,默认为true ＊

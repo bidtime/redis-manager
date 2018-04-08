@@ -3,6 +3,8 @@ package org.bidtime.cache;
 import java.util.Set;
 
 import org.bidtime.cache.utils.SerializeUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
@@ -13,7 +15,9 @@ import redis.clients.jedis.JedisPoolConfig;
  * jss
  */
 public class RedisCacheHost extends AbstractCache {
-
+  
+  private static final Logger log = LoggerFactory.getLogger(RedisCacheHost.class);
+  
   protected JedisPool jedisPool;
 
   public RedisCacheHost() {
@@ -37,30 +41,44 @@ public class RedisCacheHost extends AbstractCache {
     Jedis client = null;
     try {
       client = jedisPool.getResource();
-    } catch (Exception e) {}
+    } catch (Exception e) {
+      log.error("getClient: {}", e.getMessage());
+    }
     return client;
   }
 
+  @Override
   public void set(String key, int seconds, Object o) throws Exception {
     Jedis client = getClient();
     try {
-      String kk = client.setex(key.getBytes(), seconds, SerializeUtil.serialize(o));
-      //String kk = client.set(key.getBytes(), SerializeUtil.serialize(o));
-      System.out.println(kk);
+      String kk = null;
+      if (log.isDebugEnabled()) {
+        kk = client.setex(key.getBytes(), seconds, SerializeUtil.serialize(o));
+      } else {
+        kk = client.setex(key.getBytes(), seconds, SerializeUtil.serialize(o));
+      }
+      log.debug("set: {}", kk);
     } finally {
       client.close();
     }
   }
 
+  @Override
   public void delete(String key) throws Exception {
     Jedis client = getClient();
     try {
-      client.del(key);
+      if (log.isDebugEnabled()) {
+        Long l = client.del(key);
+        log.debug("del: {}", l);
+      } else {
+        client.del(key);
+      }
     } finally {
       client.close();
     }
   }
 
+  @Override
   public void replace(String key, int seconds, Object o) throws Exception {
     Jedis client = getClient();
     try {
@@ -71,41 +89,82 @@ public class RedisCacheHost extends AbstractCache {
     }
   }
 
-  public Object get(String key) throws Exception {
+  @Override
+  public Object get(String key, boolean del) throws Exception {
     Object o = null;
     Jedis client = getClient();
     try {
       byte[] bytes = client.get(key.getBytes());
-      System.out.println(bytes);
       o = SerializeUtil.unserialize(bytes);
     } finally {
+      if (del) {
+        this.delete(key);
+      }
       client.close();
     }
     return o;
   }
   
-  public String getString(String key) throws Exception {
+  @Override
+  public String getString(String key, boolean del) throws Exception {
     String o = null;
     Jedis client = getClient();
     try {
-      o = client.get(key);
+      byte[] bytes = client.get(key.getBytes());
+      o = new String(bytes);
     } finally {
+      if (del) {
+        this.delete(key);
+      }
       client.close();
     }
     return o;
   }
   
+  @Override
   public void setString(String key, int seconds, String s) throws Exception {
     Jedis client = getClient();
     try {
-      client.expire(key, seconds);
-      String kk = client.set(key, s);
-      //String kk = client.setex(key.getBytes(), seconds, s.getBytes());
-      System.out.println(kk);
+      String kk = null;
+      if (log.isDebugEnabled()) {
+        kk = client.setex(key.getBytes(), seconds, s.getBytes());
+      } else {
+        kk = client.setex(key.getBytes(), seconds, s.getBytes());
+      }
+      log.debug("set: {}", kk);
     } finally {
       client.close();
     }
   }
+
+//  @Override
+//  public String getString(String key, boolean del) throws Exception {
+//    String o = null;
+//    Jedis client = getClient();
+//    try {
+//      o = client.get(key);
+//    } finally {
+//      client.close();
+//    }
+//    return o;
+//  }
+//  
+//  @Override
+//  public void setString(String key, int seconds, String s) throws Exception {
+//    Jedis client = getClient();
+//    try {
+//      client.expire(key, seconds);
+//      String kk = null;
+//      if (log.isDebugEnabled()) {
+//        kk = client.set(key, s);
+//        log.debug("setString: {}", kk);
+//      } else {
+//        client.set(key, s);
+//      }
+//    } finally {
+//      client.close();
+//    }
+//  }
 
   public JedisPool getJedisPool() {
     return jedisPool;
