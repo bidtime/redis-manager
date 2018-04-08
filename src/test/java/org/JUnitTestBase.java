@@ -41,7 +41,6 @@ public class JUnitTestBase {
   
   public void setString(String v) throws Exception {
     AbstractCache cache = this.getRedis();
-    //String v = "542";
     cache.setString(KEY1, 200000, v);
     print(v);
   }

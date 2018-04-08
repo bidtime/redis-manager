@@ -85,7 +85,7 @@ public class RedisCacheHosts extends AbstractCache {
       return SerializeUtil.unserialize(person);
     } finally {
       if (del) {
-        this.delete(key);
+        client.del(key);
       }
       client.close();
     }
@@ -100,7 +100,7 @@ public class RedisCacheHosts extends AbstractCache {
       o = new String(bytes);
     } finally {
       if (del) {
-        this.delete(key);
+        client.del(key);
       }
       client.close();
     }
@@ -111,13 +111,12 @@ public class RedisCacheHosts extends AbstractCache {
   public void setString(String key, int seconds, String s) throws Exception {
     JedisCluster client = getClient();
     try {
-      String kk = null;
       if (log.isDebugEnabled()) {
-        kk = client.setex(key.getBytes(), seconds, s.getBytes());
+        String kk = client.setex(key.getBytes(), seconds, s.getBytes());
+        log.debug("setString: {}", kk);
       } else {
-        kk = client.setex(key.getBytes(), seconds, s.getBytes());
+        client.setex(key.getBytes(), seconds, s.getBytes());
       }
-      log.debug("set: {}", kk);
     } finally {
       client.close();
     }

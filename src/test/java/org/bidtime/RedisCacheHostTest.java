@@ -43,7 +43,7 @@ public class RedisCacheHostTest extends JUnitTestBase {
 
   @Test
   public void test_setString() throws Exception {
-    String v = "054";
+    String v = "中华人民共和国";
     super.setString(v);
   }
 
